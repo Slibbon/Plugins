@@ -1,5 +1,6 @@
 package net.runelite.client.plugins.oneclickvyres;
 
+import com.google.common.eventbus.Subscribe;
 import com.google.inject.Provides;
 import lombok.extern.slf4j.Slf4j;
 import net.runelite.api.*;
@@ -20,7 +21,6 @@ import net.runelite.client.chat.ChatColorType;
 import net.runelite.client.chat.ChatMessageBuilder;
 import net.runelite.client.chat.ChatMessageManager;
 import net.runelite.client.chat.QueuedMessage;
-import net.runelite.client.eventbus.Subscribe;
 import net.runelite.client.game.ItemManager;
 import net.runelite.client.plugins.Plugin;
 import net.runelite.client.plugins.PluginDescriptor;
@@ -82,7 +82,7 @@ public class OneClickVyresPlugin extends Plugin
 
    }
 
-   private boolean debug = true;
+   private boolean debug = false;
    private State state = State.THIEVING;
    private int bankingState = 0;
 

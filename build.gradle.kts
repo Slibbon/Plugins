@@ -13,17 +13,9 @@ plugins {
 project.extra["GithubUrl"] = "https://github.com/Slibbon/Plugins"
 
 apply<BootstrapPlugin>()
-apply<VersionPlugin>()
-
-allprojects {
-    group = "com.openosrs"
-    version = ProjectVersions.openosrsVersion
-    apply<MavenPublishPlugin>()
-}
 
 subprojects {
-    var subprojectName = name
-    group = "com.openosrs.externals"
+    group = "com.example"
 
     project.extra["PluginProvider"] = "Slibbon"
     project.extra["ProjectUrl"] = "https://github.com/Slibbon/Plugins"
@@ -33,20 +25,6 @@ subprojects {
         jcenter {
             content {
                 excludeGroupByRegex("com\\.openosrs.*")
-                excludeGroupByRegex("com\\.runelite.*")
-            }
-        }
-
-        exclusiveContent {
-            forRepository {
-                maven {
-                    url = uri("https://repo.runelite.net")
-                }
-            }
-            filter {
-                includeModule("net.runelite", "discord")
-                includeModule("net.runelite.jogl", "jogl-all")
-                includeModule("net.runelite.gluegen", "gluegen-rt")
             }
         }
 
@@ -86,19 +64,6 @@ subprojects {
         compileOnly(group = "org.pushing-pixels", name = "radiance-substance", version = "2.5.1")
     }
 
-    configure<PublishingExtension> {
-        repositories {
-            maven {
-                url = uri("$buildDir/repo")
-            }
-        }
-        publications {
-            register("mavenJava", MavenPublication::class) {
-                from(components["java"])
-            }
-        }
-    }
-
     configure<JavaPluginConvention> {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
@@ -109,24 +74,6 @@ subprojects {
             options.encoding = "UTF-8"
         }
 
-        withType<Jar> {
-            doLast {
-                copy {
-                    from("./build/libs/")
-                    into("../release/")
-                }
-
-                val externalManagerDirectory: String = project.findProperty("externalManagerDirectory")?.toString() ?: System.getProperty("user.home") + "/.openosrs/plugins"
-                val releaseToExternalModules: List<String> = project.findProperty("releaseToExternalmanager")?.toString()?.split(",") ?: emptyList()
-                if (releaseToExternalModules.contains(subprojectName) || releaseToExternalModules.contains("all")) {
-                    copy {
-                        from("./build/libs/")
-                        into(externalManagerDirectory)
-                    }
-                }
-            }
-        }
-
         withType<AbstractArchiveTask> {
             isPreserveFileTimestamps = false
             isReproducibleFileOrder = true
@@ -134,45 +81,13 @@ subprojects {
             fileMode = 420
         }
 
-        named<com.github.benmanes.gradle.versions.updates.DependencyUpdatesTask>("dependencyUpdates") {
-            checkForGradleUpdate = false
-
-            resolutionStrategy {
-                componentSelection {
-                    all {
-                        if (candidate.displayName.contains("fernflower") || isNonStable(candidate.version)) {
-                            reject("Non stable")
-                        }
-                    }
+        withType<Jar> {
+            doLast {
+                copy {
+                    from("./build/libs/")
+                    into("../release/")
                 }
             }
         }
-
-        register<Copy>("copyDeps") {
-            into("./build/deps/")
-            from(configurations["runtimeClasspath"])
-        }
-    }
-}
-
-tasks {
-    named<com.github.benmanes.gradle.versions.updates.DependencyUpdatesTask>("dependencyUpdates") {
-        checkForGradleUpdate = false
-
-        resolutionStrategy {
-            componentSelection {
-                all {
-                    if (candidate.displayName.contains("fernflower") || isNonStable(candidate.version)) {
-                        reject("Non stable")
-                    }
-                }
-            }
-        }
-    }
-}
-
-fun isNonStable(version: String): Boolean {
-    return listOf("ALPHA", "BETA", "RC").any {
-        version.toUpperCase().contains(it)
     }
 }
