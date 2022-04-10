@@ -1,22 +1,14 @@
-# Pajeet Plugins
-External plugins for OpenOSRS, created by Sundar
-
-Join the discord server: https://discord.com/invite/MD8GYe2pWH
+# Slibbon External Plugins
+External plugins for OpenOSRS, created by Slibbon
 
 ## How to install
 Add this repository to your client:
 
-**Github Repository owner:** Sundar-Gandu
+**Github Repository owner:** Slibbon
 
-**Github Repository name:** Pajeet-Plugins
+**Github Repository name:** Plugins
 
-## Other plugins
-I offer premium (paid) plugins. This includes One Click Herbiboar, One Click Blast Furnace, One Click ZMI, and many others.
-If you are interested, join the [discord server].
+# Plugin Setup
 
-## What is a "one click" plugin?
-A one click plugin is a menu entry swapper that swaps the menu entry after you click, but before it gets processed and sent by the client.
-This way, you can be sure that you are clicking the "correct" menu entry every time.
-One click plugins do not have any automation, you have to manually click for every action to happen.
-
-[discord server]: <https://discord.com/invite/MD8GYe2pWH>
+## One Click Vyres
+Start either in edgeville bank or the house with a knife in it near the Darkmeyer teleport. Must have Drakan's medallion and construction cape or house tabs in inventory. 
