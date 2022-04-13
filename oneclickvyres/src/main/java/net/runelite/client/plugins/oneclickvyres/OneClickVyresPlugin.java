@@ -91,7 +91,7 @@ public class OneClickVyresPlugin extends Plugin
    Set<Integer> foodBlacklist = Set.of(139,141,143,2434,3024,3026,3028,3030,24774,189,191,193,2450,26340,26342,26344,26346);
    Set<Integer> coinPouches = Set.of(22521,22522,22523,22524,22525,22526,22527,22528,22529,22530,22531,22532,22533,22534,22535,22536,22537,22538,24703);
    Set<Integer> DROP_IDS = Set.of(24774, 1619, 1601);
-   Set<Integer> BANK_IDS = Set.of(560, 565);
+   Set<Integer> BANK_IDS = Set.of(24777, 560, 565);
    private boolean shouldHeal = false;
    private int teleCooldown = 0;
 
