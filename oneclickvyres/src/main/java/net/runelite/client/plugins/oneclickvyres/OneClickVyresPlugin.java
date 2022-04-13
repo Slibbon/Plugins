@@ -1,17 +1,17 @@
 package net.runelite.client.plugins.oneclickvyres;
 
-import com.google.common.eventbus.Subscribe;
 import com.google.inject.Provides;
 import lombok.extern.slf4j.Slf4j;
 import net.runelite.api.*;
 import net.runelite.api.coords.WorldArea;
 import net.runelite.api.coords.WorldPoint;
-import net.runelite.api.events.ChatMessage;
 import net.runelite.api.events.ClientTick;
 import net.runelite.api.events.GameTick;
 import net.runelite.api.events.MenuOptionClicked;
-import net.runelite.api.events.StatChanged;
-import net.runelite.api.queries.*;
+import net.runelite.api.queries.BankItemQuery;
+import net.runelite.api.queries.GameObjectQuery;
+import net.runelite.api.queries.NPCQuery;
+import net.runelite.api.queries.WallObjectQuery;
 import net.runelite.api.util.Text;
 import net.runelite.api.widgets.Widget;
 import net.runelite.api.widgets.WidgetInfo;
@@ -21,13 +21,15 @@ import net.runelite.client.chat.ChatColorType;
 import net.runelite.client.chat.ChatMessageBuilder;
 import net.runelite.client.chat.ChatMessageManager;
 import net.runelite.client.chat.QueuedMessage;
+import net.runelite.client.config.ConfigManager;
+import net.runelite.client.eventbus.Subscribe;
 import net.runelite.client.game.ItemManager;
 import net.runelite.client.plugins.Plugin;
 import net.runelite.client.plugins.PluginDescriptor;
-import net.runelite.client.config.ConfigManager;
 import net.runelite.client.ui.overlay.OverlayManager;
 import net.runelite.rs.api.RSClient;
 import org.pf4j.Extension;
+
 import javax.inject.Inject;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -76,12 +78,6 @@ public class OneClickVyresPlugin extends Plugin
       teleCooldown = 0;
    }
 
-   @Override
-   protected void shutDown()
-   {
-
-   }
-
    private boolean debug = false;
    private State state = State.THIEVING;
    private int bankingState = 0;
@@ -98,18 +94,6 @@ public class OneClickVyresPlugin extends Plugin
    private static final int DODGY_NECKLACE_ID = 21143;
 
    @Subscribe
-   public void onChatMessage(ChatMessage event)
-   {
-
-   }
-
-   @Subscribe
-   public void onStatChanged(StatChanged event)
-   {
-
-   }
-
-   @Subscribe
    private void onClientTick(ClientTick event)
    {
       if(client.getLocalPlayer() == null || client.getGameState() != GameState.LOGGED_IN || client.isMenuOpen())
@@ -122,8 +106,8 @@ public class OneClickVyresPlugin extends Plugin
    @Subscribe
    public void onMenuOptionClicked(MenuOptionClicked event)
    {
-      //change click to pickpocket
-      if(event.getMenuOption().equals("<col=00ff00>One Click Vyres"))
+      // Change click to pickpocket
+      if (event.getMenuOption().equals("<col=00ff00>One Click Vyres"))
       {
          handleClick(event);
       }
