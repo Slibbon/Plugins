@@ -59,14 +59,14 @@ public interface OneClickVyresConfig extends Config
         return false;
     }
 
-    @ConfigItem(
-            keyName = "enableNecklace",
-            name = "Dodgy Necklace",
-            description = "This will put on dodgy necklaces when they break",
-            position = 4
-    )
-    default boolean enableNecklace()
-    {
-        return false;
-    }
+//    @ConfigItem(
+//            keyName = "enableNecklace",
+//            name = "Dodgy Necklace",
+//            description = "This will put on dodgy necklaces when they break",
+//            position = 4
+//    )
+//    default boolean enableNecklace()
+//    {
+//        return false;
+//    }
 }

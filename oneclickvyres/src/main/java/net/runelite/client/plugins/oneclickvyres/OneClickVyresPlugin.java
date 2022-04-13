@@ -265,16 +265,16 @@ public class OneClickVyresPlugin extends Plugin
                  false));
       }
       //dodgy necklace
-      else if(config.enableNecklace() && getWidgetItem(DODGY_NECKLACE_ID) != null && !isItemEquipped(List.of(DODGY_NECKLACE_ID)))
-      {
-         event.setMenuEntry(client.createMenuEntry(
-                 "Wear",
-                 "Necklace",
-                 DODGY_NECKLACE_ID,
-                 MenuAction.ITEM_SECOND_OPTION.getId(),
-                 getWidgetItem(DODGY_NECKLACE_ID).getIndex(),
-                 WidgetInfo.INVENTORY.getId(), false));
-      }
+//      else if(config.enableNecklace() && getWidgetItem(DODGY_NECKLACE_ID) != null && !isItemEquipped(List.of(DODGY_NECKLACE_ID)))
+//      {
+//         event.setMenuEntry(client.createMenuEntry(
+//                 "Wear",
+//                 "Necklace",
+//                 DODGY_NECKLACE_ID,
+//                 MenuAction.ITEM_SECOND_OPTION.getId(),
+//                 getWidgetItem(DODGY_NECKLACE_ID).getIndex(),
+//                 WidgetInfo.INVENTORY.getId(), false));
+//      }
       //varbit is shadowveil cooldown
       else if(config.enableSpell() && client.getVarbitValue(12414) == 0)
       {

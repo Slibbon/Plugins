@@ -15,15 +15,11 @@ project.extra["GithubUrl"] = "https://github.com/Slibbon/Plugins"
 apply<BootstrapPlugin>()
 apply<VersionPlugin>()
 
-allprojects {
+subprojects {
+    var subprojectName = name
     group = "com.openosrs"
     version = ProjectVersions.openosrsVersion
     apply<MavenPublishPlugin>()
-}
-
-subprojects {
-    var subprojectName = name
-    group = "com.openosrs.externals"
 
     project.extra["PluginProvider"] = "Slibbon"
     project.extra["ProjectUrl"] = "https://github.com/Slibbon/Plugins"
