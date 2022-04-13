@@ -11,4 +11,4 @@ Add this repository to your client:
 # Plugin Setup
 
 ## One Click Vyres
-Start either in edgeville bank or the house with a knife in it near the Darkmeyer teleport. Must have Drakan's medallion and construction cape or house tabs in inventory. 
+Start either in edgeville bank or the house with a knife in it south east of the Darkmeyer teleport. Must have Drakan's medallion and construction cape or house tabs in inventory. Bank pin needs to be entered and withdraw option needs to be set to 1. House requires a jewelery box with last teleport used as Edgeville.
