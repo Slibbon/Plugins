@@ -25,6 +25,7 @@
 
 rootProject.name = "Slib External Plugins"
 
+include(":oneclickgranite")
 include(":oneclickvyres")
 
 

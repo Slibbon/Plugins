@@ -76,27 +76,29 @@ public class OneClickVyresPlugin extends Plugin
    protected void startUp()
    {
       teleCooldown = 0;
+      running = true;
    }
 
    private boolean debug = false;
+   private boolean running = true;
    private State state = State.THIEVING;
    private int bankingState = 0;
+   private boolean shouldHeal = false;
+   private int teleCooldown = 0;
 
-   private int VYRE_ID = 9712;
    Set<String> foodMenuOption = Set.of("Drink","Eat");
    Set<Integer> foodBlacklist = Set.of(139,141,143,2434,3024,3026,3028,3030,24774,189,191,193,2450,26340,26342,26344,26346);
    Set<Integer> coinPouches = Set.of(22521,22522,22523,22524,22525,22526,22527,22528,22529,22530,22531,22532,22533,22534,22535,22536,22537,22538,24703);
    Set<Integer> DROP_IDS = Set.of(24774, 1619, 1601);
    Set<Integer> BANK_IDS = Set.of(24777, 560, 565);
-   private boolean shouldHeal = false;
-   private int teleCooldown = 0;
-
+   Set<Integer> NPC_VYRES = Set.of(9761, 9759, 9756);
+   private final int VYRE_ID = 9712;
    private static final int DODGY_NECKLACE_ID = 21143;
 
    @Subscribe
    private void onClientTick(ClientTick event)
    {
-      if(client.getLocalPlayer() == null || client.getGameState() != GameState.LOGGED_IN || client.isMenuOpen())
+      if (client.getLocalPlayer() == null || client.getGameState() != GameState.LOGGED_IN || client.isMenuOpen())
          return;
       String text = "<col=00ff00>One Click Vyres";
       client.insertMenuItem(text, "", MenuAction.UNKNOWN.getId(), 0, 0, 0, true);
@@ -116,6 +118,18 @@ public class OneClickVyresPlugin extends Plugin
    @Subscribe
    public void onGameTick(GameTick event)
    {
+      if (!running) return;
+      if (npcInHouse())
+      {
+         notifier.notify("Vyre attacking in house, teleporting");
+         sendGameMessage("Vyre attacking, take it out of the house then restart plugin");
+         running = false;
+      } else if (!thieveVyreInHouse()) {
+         notifier.notify("Vyre to thieve from not in house");
+         sendGameMessage("Bring vyre to thieve from inside then restart plugin");
+         running = false;
+      }
+
       if (teleCooldown > 0) teleCooldown--;
 
       if (client.getBoostedSkillLevel(Skill.HITPOINTS) >= Math.min(client.getRealSkillLevel(Skill.HITPOINTS), config.HPTopThreshold()))
@@ -129,6 +143,15 @@ public class OneClickVyresPlugin extends Plugin
    }
 
    private void handleClick(MenuOptionClicked event) {
+      if (!running) {
+         // Tele to POH if aggressive NPC is in the house then the user can sort it out
+         if (npcInHouse() && !isInPOH()) {
+            event.setMenuEntry(teleToPOH());
+         } else {
+            event.consume();
+         }
+         return;
+      }
       if (state == State.THIEVING) {
          thieve(event);
       } else if (state == State.BANKING) {
@@ -181,28 +204,6 @@ public class OneClickVyresPlugin extends Plugin
                  0,
                  0,
                  false));
-
-         switch (getActions(npc).indexOf("Pickpocket")) {
-            case 0:
-               event.setMenuAction(MenuAction.NPC_FIRST_OPTION);
-               break;
-            case 1:
-               event.setMenuAction(MenuAction.NPC_SECOND_OPTION);
-               break;
-            case 2:
-               event.setMenuAction(MenuAction.NPC_THIRD_OPTION);
-               break;
-            case 3:
-               event.setMenuAction(MenuAction.NPC_FOURTH_OPTION);
-               break;
-            case 4:
-               event.setMenuAction(MenuAction.NPC_FIFTH_OPTION);
-               break;
-            default:
-               sendGameMessage("Did not find pickpocket option on npc, check configs");
-               event.consume();
-               return;
-         }
       }
       else
       {
@@ -476,6 +477,22 @@ public class OneClickVyresPlugin extends Plugin
 
    private boolean isInDarkmeyer() {
       return client.getLocalPlayer().getWorldLocation().isInArea(new WorldArea(new WorldPoint(3589,3334,0),new WorldPoint(3595,3340,0)));
+   }
+
+   private boolean npcInHouse() {
+      NPC npc = new NPCQuery().idEquals(NPC_VYRES).result(client).nearestTo(client.getLocalPlayer());
+      if (npc != null && npc.getWorldLocation().isInArea(new WorldArea(new WorldPoint(3608,3322,0),new WorldPoint(3613,3328,0)))) {
+         return true;
+      }
+      return false;
+   }
+
+   private boolean thieveVyreInHouse() {
+      NPC npc = new NPCQuery().idEquals(VYRE_ID).result(client).nearestTo(client.getLocalPlayer());
+      if (npc != null && npc.getWorldLocation().isInArea(new WorldArea(new WorldPoint(3608,3322,0),new WorldPoint(3613,3328,0)))) {
+         return true;
+      }
+      return false;
    }
 
    private boolean isInHouse() {
