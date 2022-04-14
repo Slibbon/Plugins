@@ -119,15 +119,16 @@ public class OneClickVyresPlugin extends Plugin
    public void onGameTick(GameTick event)
    {
       if (!running) return;
-      if (npcInHouse())
-      {
-         notifier.notify("Vyre attacking in house, teleporting");
-         sendGameMessage("Vyre attacking, take it out of the house then restart plugin");
-         running = false;
-      } else if (!thieveVyreInHouse()) {
-         notifier.notify("Vyre to thieve from not in house");
-         sendGameMessage("Bring vyre to thieve from inside then restart plugin");
-         running = false;
+      if (state == State.THIEVING) {
+         if (isInHouse() && npcInHouse()) {
+            notifier.notify("Vyre attacking in house, teleporting");
+            sendGameMessage("Vyre attacking, take it out of the house then restart plugin");
+            running = false;
+         } else if (isInHouse() && !thieveVyreInHouse()) {
+            notifier.notify("Vyre to thieve from not in house");
+            sendGameMessage("Bring vyre to thieve from inside then restart plugin");
+            running = false;
+         }
       }
 
       if (teleCooldown > 0) teleCooldown--;
