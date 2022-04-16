@@ -5,6 +5,7 @@ External plugins for OpenOSRS, created by Slibbon
 Add this repository to your client:
 
 **Github Repository owner:** Slibbon
+
 **Github Repository name:** Plugins
 
 # Plugin Information
