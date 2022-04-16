@@ -7,6 +7,7 @@ import net.runelite.api.ItemID;
 public enum FoodTypes {
     KARAMBWAN(ItemID.COOKED_KARAMBWAN),
     SHARK(ItemID.SHARK),
+    MONKFISH(ItemID.MONKFISH),
     SWORDFISH(ItemID.SWORDFISH),
     LOBSTER(ItemID.LOBSTER),
     TUNA(ItemID.TUNA);

@@ -18,6 +18,16 @@ public interface OneClickVyresConfig extends Config
         return FoodTypes.KARAMBWAN;
     }
 
+    @ConfigItem(
+            keyName = "foodId",
+            name = "Food ID Override",
+            description = "ID of food to eat if not set to 0.",
+            position = 1
+    )
+    default int foodId() {
+        return 0;
+    }
+
     @Range(
             max = 99,
             min = 10
@@ -26,7 +36,7 @@ public interface OneClickVyresConfig extends Config
             keyName = "HPTopThreshold",
             name = "Maximum HP",
             description = "You will STOP eating when your HP is at or above this number",
-            position = 1
+            position = 2
     )
     default int HPTopThreshold()
     {
@@ -41,18 +51,18 @@ public interface OneClickVyresConfig extends Config
             keyName = "HPBottomThreshold",
             name = "Minimum HP",
             description = "You will START eating when your HP is at or below this number",
-            position = 2
+            position = 3
     )
     default int HPBottomThreshold()
     {
-        return 10;
+        return 15;
     }
 
     @ConfigItem(
             keyName = "enableSpell",
             name = "Use Shadow Veil",
             description = "This will cast the arceuus spell Shadow Veil",
-            position = 3
+            position = 4
     )
     default boolean enableSpell()
     {
@@ -63,7 +73,7 @@ public interface OneClickVyresConfig extends Config
 //            keyName = "enableNecklace",
 //            name = "Dodgy Necklace",
 //            description = "This will put on dodgy necklaces when they break",
-//            position = 4
+//            position = 5
 //    )
 //    default boolean enableNecklace()
 //    {

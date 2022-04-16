@@ -76,11 +76,10 @@ public class OneClickVyresPlugin extends Plugin
    protected void startUp()
    {
       teleCooldown = 0;
-      running = true;
+      state = State.THIEVING;
    }
 
    private boolean debug = false;
-   private boolean running = true;
    private State state = State.THIEVING;
    private int bankingState = 0;
    private boolean shouldHeal = false;
@@ -118,16 +117,16 @@ public class OneClickVyresPlugin extends Plugin
    @Subscribe
    public void onGameTick(GameTick event)
    {
-      if (!running) return;
+      if (state == State.STOPPED) return;
       if (state == State.THIEVING) {
          if (isInHouse() && npcInHouse()) {
             notifier.notify("Vyre attacking in house, teleporting");
             sendGameMessage("Vyre attacking, take it out of the house then restart plugin");
-            running = false;
+            state = State.STOPPED;
          } else if (isInHouse() && !thieveVyreInHouse()) {
             notifier.notify("Vyre to thieve from not in house");
             sendGameMessage("Bring vyre to thieve from inside then restart plugin");
-            running = false;
+            state = State.STOPPED;
          }
       }
 
@@ -144,7 +143,7 @@ public class OneClickVyresPlugin extends Plugin
    }
 
    private void handleClick(MenuOptionClicked event) {
-      if (!running) {
+      if (state == State.STOPPED) {
          // Tele to POH if aggressive NPC is in the house then the user can sort it out
          if (npcInHouse() && !isInPOH()) {
             event.setMenuEntry(teleToPOH());
@@ -230,12 +229,10 @@ public class OneClickVyresPlugin extends Plugin
       if(shouldHeal || remainingInventorySlots() < 2)
       {
          boolean hpLow = client.getBoostedSkillLevel(Skill.HITPOINTS) <= Math.max(5,config.HPBottomThreshold());
-         WidgetItem food = getItemMenu(foodMenuOption,foodBlacklist);
+         WidgetItem food = getItemMenu(foodMenuOption, foodBlacklist);
          if (food == null && hpLow)
          {
             event.consume();
-            notifier.notify("You are out of food");
-            sendGameMessage("You are out of food");
             state = State.BANKING;
             return;
          }
@@ -307,10 +304,15 @@ public class OneClickVyresPlugin extends Plugin
       }
    }
 
+   private MenuEntry closeBank() {
+      // 11th element of title bar widget
+      return createMenuEntry(1, MenuAction.CC_OP, 11, 786434, false);
+   }
+
    private void bank(MenuOptionClicked event) {
       if(client.getLocalPlayer().isMoving())
       {
-         print("consuming click while moving");
+         print("Consuming click while moving");
          event.consume();
          return;
       }
@@ -329,7 +331,6 @@ public class OneClickVyresPlugin extends Plugin
             GameObject jeweleryBox = getGameObject(29156);
             if (jeweleryBox != null) {
                event.setMenuEntry(createMenuEntry(jeweleryBox.getId(), MenuAction.GAME_OBJECT_THIRD_OPTION, getLocation(jeweleryBox).getX(), getLocation(jeweleryBox).getY(), false));
-               return;
             } else {
                print("No jew box");
             }
@@ -338,7 +339,6 @@ public class OneClickVyresPlugin extends Plugin
                event.setMenuEntry(teleToPOH());
                teleCooldown = 5;
             }
-            return;
          }
       }
       else if (bankingState == 1) {
@@ -347,7 +347,6 @@ public class OneClickVyresPlugin extends Plugin
             GameObject bankBooth = getGameObject(10355);
             if (bankBooth != null) {
                event.setMenuEntry(createMenuEntry(bankBooth.getId(), MenuAction.GAME_OBJECT_SECOND_OPTION, getLocation(bankBooth).getX(), getLocation(bankBooth).getY(), false));
-               return;
             }
          } else if (bankOpen()) {
             if (itemsToDeposit()) {
@@ -362,20 +361,18 @@ public class OneClickVyresPlugin extends Plugin
             } else if (hasFood() && remainingInventorySlots() >= 2) {
                bankingState = 2;
             }
-            return;
          }
       } else if (bankingState == 2) {
          print("Tele to darkmeyer");
          if (isInDarkmeyer()) {
             resetBanking();
             state = State.THIEVING;
-            return;
-         }
-         if (teleCooldown <= 0) {
+         } else if (bankOpen()) {
+            event.setMenuEntry(closeBank());
+         } else if (teleCooldown <= 0) {
             MenuEntry task = teleToDarkmeyer();
             if (task != null) event.setMenuEntry(task);
             teleCooldown = 5;
-            return;
          }
       }
    }
@@ -395,14 +392,20 @@ public class OneClickVyresPlugin extends Plugin
    }
 
    private MenuEntry teleToDarkmeyer() {
+      if (client.getItemContainer(InventoryID.EQUIPMENT) != null)
+      {
+         // Try teleport with equipped amulet
+         if (client.getItemContainer(InventoryID.EQUIPMENT).contains(22400))
+         {
+            return createMenuEntry(3, MenuAction.CC_OP, -1, WidgetInfo.EQUIPMENT_AMULET.getId(), false);
+         }
+      }
+
+      // Teleport with amulet in inventory
       WidgetItem amulet = getInventoryItem(22400);
       if (amulet != null) {
          return createMenuEntry(amulet.getId(), MenuAction.ITEM_THIRD_OPTION, amulet.getIndex(), WidgetInfo.INVENTORY.getId(), false);
       }
-
-//      if (client.getItemContainer(InventoryID.EQUIPMENT) != null && client.getItemContainer(InventoryID.EQUIPMENT).contains(22400)) {
-//         return createMenuEntry(3, MenuAction.CC_OP, -1, 22400, false);
-//      }
       return null;
    }
 
@@ -431,11 +434,12 @@ public class OneClickVyresPlugin extends Plugin
    }
 
    private MenuEntry depositExtraFood() {
-      if (getInventoryItem(config.food().getId()) != null) {
+      Integer foodId = config.foodId() > 0 ? config.foodId() : config.food().getId();
+      if (getInventoryItem(foodId) != null) {
          return createMenuEntry(
               2,
               MenuAction.CC_OP_LOW_PRIORITY,
-              getInventoryItem(config.food().getId()).getIndex(),
+              getInventoryItem(foodId).getIndex(),
               983043,
               false);
       }
@@ -443,7 +447,8 @@ public class OneClickVyresPlugin extends Plugin
    }
 
    private MenuEntry withdrawFood() {
-      return createMenuEntry(7, MenuAction.CC_OP_LOW_PRIORITY, getBankIndex(config.food().getId()), WidgetInfo.BANK_ITEM_CONTAINER.getId(), false);
+      Integer foodId = config.foodId() > 0 ? config.foodId() : config.food().getId();
+      return createMenuEntry(7, MenuAction.CC_OP_LOW_PRIORITY, getBankIndex(foodId), WidgetInfo.BANK_ITEM_CONTAINER.getId(), false);
    }
 
    private int getBankIndex(int ID){
@@ -455,7 +460,8 @@ public class OneClickVyresPlugin extends Plugin
    }
 
    private boolean hasFood() {
-      return getInventoryItem(config.food().getId()) != null;
+      Integer foodId = config.foodId() > 0 ? config.foodId() : config.food().getId();
+      return getInventoryItem(foodId) != null;
    }
 
    private boolean itemsToDeposit() {
@@ -481,9 +487,13 @@ public class OneClickVyresPlugin extends Plugin
    }
 
    private boolean npcInHouse() {
-      NPC npc = new NPCQuery().idEquals(NPC_VYRES).result(client).nearestTo(client.getLocalPlayer());
-      if (npc != null && npc.getWorldLocation().isInArea(new WorldArea(new WorldPoint(3608,3322,0),new WorldPoint(3613,3328,0)))) {
-         return true;
+      WorldArea area = new WorldArea(new WorldPoint(3608,3322,0),new WorldPoint(3613,3328,0));
+      for(Integer id : NPC_VYRES){
+         NPC npc = new NPCQuery().idEquals(id).result(client).nearestTo(client.getLocalPlayer());
+         if (area.contains(npc.getWorldLocation())) {
+            print("NPC " + id.toString() + " in house");
+            return true;
+         }
       }
       return false;
    }
@@ -597,7 +607,7 @@ public class OneClickVyresPlugin extends Plugin
       {
          return createMenuEntry(tab.getId(), MenuAction.ITEM_FIRST_OPTION, tab.getIndex(), WidgetInfo.INVENTORY.getId(), false);
       }
-      if (client.getItemContainer(InventoryID.EQUIPMENT)!=null)
+      if (client.getItemContainer(InventoryID.EQUIPMENT) != null)
       {
          if (client.getItemContainer(InventoryID.EQUIPMENT).contains(ItemID.MAX_CAPE) || client.getItemContainer(InventoryID.EQUIPMENT).contains(ItemID.MAX_CAPE_13342))
          {
