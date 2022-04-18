@@ -132,11 +132,11 @@ public class OneClickVyresPlugin extends Plugin
 
       if (teleCooldown > 0) teleCooldown--;
 
-      if (client.getBoostedSkillLevel(Skill.HITPOINTS) >= Math.min(client.getRealSkillLevel(Skill.HITPOINTS), config.HPTopThreshold()))
+      if (client.getBoostedSkillLevel(Skill.HITPOINTS) >= config.HPTopThreshold())
       {
          shouldHeal = false;
       }
-      else if (client.getBoostedSkillLevel(Skill.HITPOINTS) <= Math.max(5,config.HPBottomThreshold()))
+      else if (client.getBoostedSkillLevel(Skill.HITPOINTS) <= config.HPBottomThreshold())
       {
          shouldHeal = true;
       }
@@ -228,12 +228,12 @@ public class OneClickVyresPlugin extends Plugin
 
       if(shouldHeal || remainingInventorySlots() < 2)
       {
-         boolean hpLow = client.getBoostedSkillLevel(Skill.HITPOINTS) <= Math.max(5,config.HPBottomThreshold());
+         boolean hpLow = client.getBoostedSkillLevel(Skill.HITPOINTS) <= config.HPBottomThreshold();
          WidgetItem food = getItemMenu(foodMenuOption, foodBlacklist);
          if (food == null && hpLow)
          {
-            event.consume();
             state = State.BANKING;
+            event.consume();
             return;
          }
          else if (food != null)
@@ -337,7 +337,7 @@ public class OneClickVyresPlugin extends Plugin
          } else if (!isInPOH()) {
             if (teleCooldown <= 0) {
                event.setMenuEntry(teleToPOH());
-               teleCooldown = 5;
+               teleCooldown = 4;
             }
          }
       }
@@ -372,7 +372,7 @@ public class OneClickVyresPlugin extends Plugin
          } else if (teleCooldown <= 0) {
             MenuEntry task = teleToDarkmeyer();
             if (task != null) event.setMenuEntry(task);
-            teleCooldown = 5;
+            teleCooldown = 4;
          }
       }
    }
@@ -490,7 +490,7 @@ public class OneClickVyresPlugin extends Plugin
       WorldArea area = new WorldArea(new WorldPoint(3608,3322,0),new WorldPoint(3613,3328,0));
       for(Integer id : NPC_VYRES){
          NPC npc = new NPCQuery().idEquals(id).result(client).nearestTo(client.getLocalPlayer());
-         if (area.contains(npc.getWorldLocation())) {
+         if (npc != null && area.contains(npc.getWorldLocation())) {
             print("NPC " + id.toString() + " in house");
             return true;
          }
